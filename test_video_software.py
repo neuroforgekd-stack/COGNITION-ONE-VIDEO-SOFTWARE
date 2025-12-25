@@ -25,15 +25,18 @@ class TestVideoInfo(unittest.TestCase):
     def test_invalid_file(self):
         """Test that invalid file returns None"""
         # Create a temporary non-video file
-        test_file = "/tmp/test_invalid.txt"
-        with open(test_file, "w") as f:
+        import tempfile
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+            test_file = f.name
             f.write("This is not a video file")
         
-        result = get_video_info(test_file)
-        self.assertIsNone(result)
-        
-        # Clean up
-        os.remove(test_file)
+        try:
+            result = get_video_info(test_file)
+            self.assertIsNone(result)
+        finally:
+            # Clean up
+            if os.path.exists(test_file):
+                os.remove(test_file)
 
 
 class TestVideoPlayer(unittest.TestCase):

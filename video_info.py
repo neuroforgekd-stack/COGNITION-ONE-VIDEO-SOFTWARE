@@ -47,8 +47,13 @@ def get_video_info(video_path):
             
         # Decode codec
         codec_int = info['codec']
-        codec_str = "".join([chr((codec_int >> 8 * i) & 0xFF) for i in range(4)])
-        info['codec_name'] = codec_str
+        try:
+            codec_str = "".join([chr((codec_int >> 8 * i) & 0xFF) for i in range(4)])
+            # Filter non-printable characters
+            codec_str = ''.join(c if c.isprintable() else '?' for c in codec_str)
+            info['codec_name'] = codec_str if codec_str.strip() else "Unknown"
+        except (ValueError, OverflowError):
+            info['codec_name'] = "Unknown"
         
         video.release()
         return info

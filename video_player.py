@@ -125,7 +125,7 @@ class VideoPlayer:
             self.current_frame = 0
             
             # Update UI
-            filename = path.split("/")[-1]
+            filename = os.path.basename(path)
             self.status_label.config(text=f"Loaded: {filename}")
             self.play_button.config(state=tk.NORMAL)
             
@@ -190,6 +190,10 @@ class VideoPlayer:
             return
             
         if not self.is_playing:
+            # Wait for previous thread to finish if exists
+            if self.play_thread and self.play_thread.is_alive():
+                return
+                
             self.is_playing = True
             self.is_paused = False
             self.play_button.config(state=tk.DISABLED)
@@ -225,6 +229,9 @@ class VideoPlayer:
                 self.pause_button.config(text="Resume")
             else:
                 self.pause_button.config(text="Pause")
+                # Wait for previous thread to finish if exists
+                if self.play_thread and self.play_thread.is_alive():
+                    return
                 # Resume playback
                 self.play_thread = threading.Thread(target=self.play_loop, daemon=True)
                 self.play_thread.start()
